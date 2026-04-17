@@ -4,7 +4,17 @@
 
 <h2>Montar Time</h2>
 
-<p>Sistema será ativado aqui</p>
+<button onclick="login()">Login Google</button>
+
+<br><br>
+
+<input id="nome" placeholder="Seu nome">
+
+<button onclick="enviar()">Entrar</button>
+
+<div id="lista"></div>
+
+<script type="module" src="app.js"></script>
 
 </body>
 </html>
