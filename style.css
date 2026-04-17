@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+body {
+  margin:0;
+  font-family: 'Orbitron', sans-serif;
+  background: radial-gradient(circle at top, #0f2027, #203a43, #000);
+  color:white;
+  text-align:center;
+}
+
+/* título */
+h1 {
+  font-size: 40px;
+  text-shadow: 0 0 20px #00ffe1;
+}
+
+/* texto ácido */
+.acid {
+  color:#ff4081;
+}
+
+/* destaque */
+.important {
+  color:#00ffe1;
+  font-weight:bold;
+}
+
+/* botão */
+.btn {
+  display:inline-block;
+  margin-top:20px;
+  padding:15px 25px;
+  background: linear-gradient(45deg,#ff00c8,#00ffe1);
+  color:white;
+  text-decoration:none;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+/* link */
+.link {
+  display:block;
+  margin-top:20px;
+  color:#00ffe1;
+}
+
+/* caixa */
+.card {
+  background: rgba(0,0,0,0.6);
+  margin:20px;
+  padding:20px;
+  border-radius:15px;
+  box-shadow: 0 0 15px #00ffe1;
+}
