@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=2.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
-
 <title>Inscrição</title>
 </head>
 
@@ -12,13 +10,35 @@
 
 <h2>Montar Time</h2>
 
+<button onclick="login()" class="btn">Login com Google</button>
+
 <div class="card">
 
-<p>Login e sistema entram aqui no próximo passo</p>
+<input id="nome" placeholder="Nome completo"><br>
+
+<input id="email" placeholder="Email"><br>
+
+<input id="celular" placeholder="Celular"><br>
+
+<select id="genero">
+<option value="M">Homem</option>
+<option value="F">Mulher</option>
+</select>
+
+<select id="categoria">
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="D">D</option>
+<option value="E">E</option>
+</select>
+
+<button onclick="entrarTime()" class="btn">Entrar / Criar Time</button>
 
 </div>
 
-<a href="index.html" class="btn">Voltar</a>
+<div id="times"></div>
+
+<script type="module" src="app.js"></script>
 
 </body>
 </html>
