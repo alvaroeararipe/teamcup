@@ -26,7 +26,9 @@ window.login = async () => {
 
   user = result.user;
 
-  alert("Logado como: " + user.email);
+  document.getElementById("userInfo").innerText = user.email;
+
+  mostrarToast("Logado com sucesso 🔥");
 };
 
 window.sairTime = async (timeId) => {
