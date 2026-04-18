@@ -1,55 +1,46 @@
-alert("JS carregou");
-let carregando = false;
+// 🔹 IMPORTS FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// 🔹 CONFIG FIREBASE (COLE A SUA AQUI)
 const firebaseConfig = {
-  apiKey: "AIzaSyDhOIXYBqBELD0LDuGamKotPeW_qBu70WY",
-  authDomain: "teamcup-a3af2.firebaseapp.com",
-  projectId: "teamcup-a3af2",
-  storageBucket: "teamcup-a3af2.firebasestorage.app",
-  messagingSenderId: "49913899541",
-  appId: "1:49913899541:web:817c26257e72f307d7fc1c",
-  measurementId: "G-Z0VTN373FN"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+  projectId: "SEU_PROJETO",
+  storageBucket: "SEU_PROJETO.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
 };
 
+// 🔹 INIT
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 
+// 🔹 VARIÁVEIS
 let user = null;
+let carregando = false;
 
+// 🔹 LOGIN GOOGLE
 window.login = async () => {
-  const provider = new GoogleAuthProvider();
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
 
-  const result = await signInWithPopup(auth, provider);
+    user = result.user;
 
-  user = result.user;
+    document.getElementById("userInfo").innerText = user.email;
 
-  document.getElementById("userInfo").innerText = user.email;
+    mostrarToast("🔥 Logado com sucesso");
 
-  mostrarToast("Logado com sucesso 🔥");
+  } catch (err) {
+    mostrarToast("Erro no login");
+    console.error(err);
+  }
 };
 
-window.sairTime = async (timeId) => {
-
-  const ref = doc(db, "times", timeId);
-  const snapshot = await getDocs(collection(db, "times"));
-
-  snapshot.forEach(async d => {
-    if(d.id === timeId){
-      let t = d.data();
-
-      t.homens = t.homens.filter(p => p.uid !== user.uid);
-      t.mulheres = t.mulheres.filter(p => p.uid !== user.uid);
-
-      await updateDoc(ref, t);
-      carregar();
-    }
-  });
-};
-
+// 🔹 ENTRAR / CRIAR TIME (VERSÃO LIMPA PRO)
 window.entrarTime = async () => {
 
   if(carregando) return;
@@ -83,7 +74,7 @@ window.entrarTime = async () => {
       }
     });
 
-    // 🔒 impedir duplicado
+    // 🔒 impedir duplicação
     for(let t of timesCategoria){
       const todos = [...t.homens, ...t.mulheres];
 
@@ -99,9 +90,7 @@ window.entrarTime = async () => {
         t.homens.push({nome:nomeInput, uid:user.uid});
         await updateDoc(doc(db,"times",t.id), t);
 
-        mostrarToast("⚡ Você entrou no time!");
-        document.getElementById("enterSound").play();
-        carregar();
+        sucessoEntrada("⚡ Você entrou no time!");
         return;
       }
 
@@ -109,9 +98,7 @@ window.entrarTime = async () => {
         t.mulheres.push({nome:nomeInput, uid:user.uid});
         await updateDoc(doc(db,"times",t.id), t);
 
-        mostrarToast("⚡ Você entrou no time!");
-        document.getElementById("enterSound").play();
-        carregar();
+        sucessoEntrada("⚡ Você entrou no time!");
         return;
       }
     }
@@ -127,17 +114,16 @@ window.entrarTime = async () => {
 
       await addDoc(collection(db,"times"), novo);
 
-      mostrarToast("🔥 Novo time criado!");
-      document.getElementById("enterSound").play();
-      carregar();
+      sucessoEntrada("🔥 Novo time criado!");
 
     } else {
-      throw new Error("Limite de times atingido nessa categoria");
+      throw new Error("Limite de times atingido");
     }
 
   } catch(err) {
 
     mostrarToast("⚠️ " + err.message);
+    console.error(err);
 
   } finally {
 
@@ -148,6 +134,45 @@ window.entrarTime = async () => {
   }
 };
 
+// 🔹 SUCESSO (som + toast + reload)
+function sucessoEntrada(msg){
+  mostrarToast(msg);
+  document.getElementById("enterSound").play();
+  carregar();
+}
+
+// 🔹 SAIR DO TIME
+window.sairTime = async (timeId) => {
+
+  const ref = doc(db, "times", timeId);
+  const snapshot = await getDocs(collection(db, "times"));
+
+  snapshot.forEach(async d => {
+    if(d.id === timeId){
+      let t = d.data();
+
+      t.homens = t.homens.filter(p => p.uid !== user.uid);
+      t.mulheres = t.mulheres.filter(p => p.uid !== user.uid);
+
+      await updateDoc(ref, t);
+      mostrarToast("Saiu do time");
+      carregar();
+    }
+  });
+};
+
+// 🔹 TOAST
+function mostrarToast(msg){
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.style.opacity = 1;
+
+  setTimeout(()=>{
+    t.style.opacity = 0;
+  },2000);
+}
+
+// 🔹 CARREGAR TIMES (UI GAMER)
 async function carregar(){
 
   const snapshot = await getDocs(collection(db, "times"));
@@ -161,7 +186,7 @@ async function carregar(){
     const total = t.homens.length + t.mulheres.length;
     const completo = total === 4;
 
-    const renderPlayers = (lista) => {
+    const render = (lista) => {
       return lista.map(p=>{
         if(p.uid === user?.uid){
           return `<span class="me">🔥 ${p.nome} (VOCÊ)</span>`;
@@ -172,14 +197,13 @@ async function carregar(){
 
     html += `
     <div class="card fade">
-
       <h3>Categoria ${t.categoria}</h3>
 
-      👨 ${renderPlayers(t.homens)}<br>
-      👩 ${renderPlayers(t.mulheres)}<br><br>
+      👨 ${render(t.homens)}<br>
+      👩 ${render(t.mulheres)}<br><br>
 
       <div class="${completo ? 'status-ok' : 'status-wait'}">
-        ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO JOGADORES ⏳'}
+        ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO ⏳'}
       </div><br>
 
       ${
@@ -187,7 +211,6 @@ async function carregar(){
         ? `<button onclick="sairTime('${d.id}')" class="btn">SAIR DO TIME</button>`
         : ""
       }
-
     </div>
     `;
   });
@@ -195,8 +218,19 @@ async function carregar(){
   document.getElementById("times").innerHTML = html;
 }
 
-carregar();
-carregando = false
-btn.disabled = false;
-btn.innerText = "ENTRAR / CRIAR TIME";
-};
+// 🔹 EFEITO CLICK ENERGIA
+document.addEventListener("click", e => {
+  const el = document.createElement("div");
+  el.className = "energy";
+  el.style.left = e.clientX + "px";
+  el.style.top = e.clientY + "px";
+  document.body.appendChild(el);
+
+  setTimeout(()=>el.remove(),600);
+});
+
+// 🔹 INICIAR
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("btnLogin").addEventListener("click", login);
+  carregar();
+});
