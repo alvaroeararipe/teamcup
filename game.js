@@ -9,10 +9,14 @@ window.onload = () => {
 let code = "";
 
 document.addEventListener("keydown", e => {
-  code += e.key;
 
-  if(code.includes("teamcup")){
-    alert("🔥 MODO CAMPEÃO ATIVADO");
+  code += e.key.toLowerCase();
+
+  if(code.includes("proplayer")){
+    alert("🔥 MODO PRO ATIVADO");
+
     document.body.style.background = "black";
+    document.body.style.color = "#00ffe1";
   }
+
 });
