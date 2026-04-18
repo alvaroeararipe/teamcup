@@ -21,13 +21,20 @@ let user = null;
 
 window.login = async () => {
   const provider = new GoogleAuthProvider();
+
   const result = await signInWithPopup(auth, provider);
+
   user = result.user;
-  alert("Logado!");
+
+  alert("Logado como: " + user.email);
 };
 
 window.entrarTime = async () => {
 
+  if(!user){
+  alert("Faça login primeiro");
+  return;
+}
   const nomeInput = document.getElementById("nome").value;
   const generoInput = document.getElementById("genero").value;
   const categoriaInput = document.getElementById("categoria").value;
