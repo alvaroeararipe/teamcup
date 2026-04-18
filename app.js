@@ -46,15 +46,9 @@ window.entrarTime = async () => {
 
 window.entrarTime = async () => {
 
-  if(carregando){
-    return;
-  }
-
-  carregando = true;
-
   
- // if(carregando) return;
- // carregando = true;
+  if(carregando) return;
+  carregando = true;
 
   const btn = document.getElementById("btnEntrar");
   btn.innerText = "PROCESSANDO...";
