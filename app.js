@@ -3,9 +3,13 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstati
 import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "49913899541",
-  authDomain: "teamcup.firebaseapp.com",
-  projectId: "teamcup-a3af2"
+  apiKey: "AIzaSyDhOIXYBqBELD0LDuGamKotPeW_qBu70WY",
+  authDomain: "teamcup-a3af2.firebaseapp.com",
+  projectId: "teamcup-a3af2",
+  storageBucket: "teamcup-a3af2.firebasestorage.app",
+  messagingSenderId: "49913899541",
+  appId: "1:49913899541:web:817c26257e72f307d7fc1c",
+  measurementId: "G-Z0VTN373FN"
 };
 
 const app = initializeApp(firebaseConfig);
