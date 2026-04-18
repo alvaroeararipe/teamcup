@@ -119,7 +119,7 @@ async function carregar(){
 
   const snapshot = await getDocs(collection(db, "times"));
 
-  let html = "<h3>Times</h3>";
+  let html = "<h3>⚔️ TIMES FORMADOS</h3>";
 
   snapshot.forEach(d=>{
 
@@ -128,18 +128,30 @@ async function carregar(){
     const total = t.homens.length + t.mulheres.length;
     const completo = total === 4;
 
+    const renderPlayers = (lista) => {
+      return lista.map(p=>{
+        if(p.uid === user?.uid){
+          return `<span class="me">🔥 ${p.nome} (VOCÊ)</span>`;
+        }
+        return p.nome;
+      }).join(", ") || "-";
+    };
+
     html += `
-    <div class="card">
-      <b>Categoria ${t.categoria}</b><br><br>
+    <div class="card fade">
 
-      👨 Homens: ${t.homens.map(h=>h.nome).join(", ") || "-" }<br>
-      👩 Mulheres: ${t.mulheres.map(m=>m.nome).join(", ") || "-" }<br><br>
+      <h3>Categoria ${t.categoria}</h3>
 
-      <b>${completo ? "🔥 COMPLETO" : "⏳ FALTANDO JOGADORES"}</b><br><br>
+      👨 ${renderPlayers(t.homens)}<br>
+      👩 ${renderPlayers(t.mulheres)}<br><br>
+
+      <div class="${completo ? 'status-ok' : 'status-wait'}">
+        ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO JOGADORES ⏳'}
+      </div><br>
 
       ${
         [...t.homens, ...t.mulheres].some(p=>p.uid === user?.uid)
-        ? `<button onclick="sairTime('${d.id}')" class="btn">Sair do time</button>`
+        ? `<button onclick="sairTime('${d.id}')" class="btn">SAIR DO TIME</button>`
         : ""
       }
 
