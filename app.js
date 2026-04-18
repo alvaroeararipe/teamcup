@@ -47,6 +47,15 @@ window.entrarTime = async () => {
 
   let timesCategoria = [];
 
+for(let t of timesCategoria){
+  const todos = [...t.homens, ...t.mulheres];
+
+  if(todos.find(p => p.uid === user.uid)){
+    alert("Você já está em um time dessa categoria");
+    return;
+  }
+}
+  
   snapshot.forEach(d=>{
     if(d.data().categoria === categoriaInput){
       timesCategoria.push({id:d.id, ...d.data()});
