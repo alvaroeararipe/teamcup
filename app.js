@@ -1,3 +1,4 @@
+let carregando = false;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -48,8 +49,15 @@ window.sairTime = async (timeId) => {
 
 window.entrarTime = async () => {
 
+  if(carregando){
+    return;
+  }
+
+  carregando = true;
+  
   if(!user){
   alert("Faça login primeiro");
+  carregando = false
   return;
 }
   const nomeInput = document.getElementById("nome").value;
@@ -58,6 +66,7 @@ window.entrarTime = async () => {
 
   if(!nomeInput){
     alert("Digite seu nome");
+    carregando = false
     return;
   }
 
@@ -70,6 +79,7 @@ for(let t of timesCategoria){
 
   if(todos.find(p => p.uid === user.uid)){
     alert("Você já está em um time dessa categoria");
+    carregando = false
     return;
   }
 }
@@ -89,6 +99,7 @@ for(let t of timesCategoria){
       mostrarToast("⚡ Você entrou no time!");
       document.getElementById("enterSound").play();
       carregar();
+      carregando = false
       return;
     }
 
@@ -98,6 +109,7 @@ for(let t of timesCategoria){
       mostrarToast("⚡ Você entrou no time!");
       document.getElementById("enterSound").play();
       carregar();
+      carregando = false
       return;
     }
   }
@@ -169,3 +181,4 @@ async function carregar(){
 }
 
 carregar();
+carregando = false
