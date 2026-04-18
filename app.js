@@ -13,7 +13,6 @@ const firebaseConfig = {
   appId: "1:49913899541:web:817c26257e72f307d7fc1c",
   measurementId: "G-Z0VTN373FN"
 };
-};
 
 // 🔹 INIT
 const app = initializeApp(firebaseConfig);
