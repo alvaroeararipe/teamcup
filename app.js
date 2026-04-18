@@ -3,7 +3,9 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstati
 import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  // COLE SUA CONFIG AQUI
+  apiKey: "49913899541",
+  authDomain: "teamcup.firebaseapp.com",
+  projectId: "teamcup-a3af2"
 };
 
 const app = initializeApp(firebaseConfig);
