@@ -48,26 +48,35 @@ window.sairTime = async (timeId) => {
 };
 
 window.entrarTime = async () => {
-
-  if(carregando){
-    return;
-  }
-
+  if(carregando) return;
   carregando = true;
   
+  const btn = document.getElementById("btnEntrar");
+btn.innerText = "PROCESSANDO...";
+btn.disabled = true;
+  
   if(!user){
-  alert("Faça login primeiro");
+  mostrarToast("Faça login primeiro");
   carregando = false
+    btn.disabled = false;
+    btn.innerText = "ENTRAR / CRIAR TIME";
+
   return;
 }
   const nomeInput = document.getElementById("nome").value;
+  
+  if(!nomeInput){
+    mostrarToast("Digite seu nome");
+    carregando = false;
+    btn.disabled = false;
+    btn.innerText = "ENTRAR / CRIAR TIME";
+    return;
+}
+  
   const generoInput = document.getElementById("genero").value;
   const categoriaInput = document.getElementById("categoria").value;
 
-  if(!nomeInput){
-    alert("Digite seu nome");
-    carregando = false
-    return;
+
   }
 
   const snapshot = await getDocs(collection(db, "times"));
@@ -182,3 +191,6 @@ async function carregar(){
 
 carregar();
 carregando = false
+btn.disabled = false;
+btn.innerText = "ENTRAR / CRIAR TIME";
+};
