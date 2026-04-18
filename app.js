@@ -48,97 +48,100 @@ window.sairTime = async (timeId) => {
 };
 
 window.entrarTime = async () => {
+
   if(carregando) return;
   carregando = true;
-  
+
   const btn = document.getElementById("btnEntrar");
-btn.innerText = "PROCESSANDO...";
-btn.disabled = true;
-  
-  if(!user){
-  mostrarToast("Faça login primeiro");
-  carregando = false
-    btn.disabled = false;
-    btn.innerText = "ENTRAR / CRIAR TIME";
+  btn.innerText = "PROCESSANDO...";
+  btn.disabled = true;
 
-  return;
-}
-  const nomeInput = document.getElementById("nome").value;
-  
-  if(!nomeInput){
-    mostrarToast("Digite seu nome");
+  try {
+
+    if(!user){
+      throw new Error("Faça login primeiro");
+    }
+
+    const nomeInput = document.getElementById("nome").value.trim();
+    const generoInput = document.getElementById("genero").value;
+    const categoriaInput = document.getElementById("categoria").value;
+
+    if(!nomeInput){
+      throw new Error("Digite seu nome");
+    }
+
+    const snapshot = await getDocs(collection(db, "times"));
+
+    let timesCategoria = [];
+
+    snapshot.forEach(d=>{
+      if(d.data().categoria === categoriaInput){
+        timesCategoria.push({id:d.id, ...d.data()});
+      }
+    });
+
+    // 🔒 impedir duplicado
+    for(let t of timesCategoria){
+      const todos = [...t.homens, ...t.mulheres];
+
+      if(todos.find(p => p.uid === user.uid)){
+        throw new Error("Você já está em um time dessa categoria");
+      }
+    }
+
+    // 🔄 tentar entrar em time existente
+    for(let t of timesCategoria){
+
+      if(generoInput === "M" && t.homens.length < 2){
+        t.homens.push({nome:nomeInput, uid:user.uid});
+        await updateDoc(doc(db,"times",t.id), t);
+
+        mostrarToast("⚡ Você entrou no time!");
+        document.getElementById("enterSound").play();
+        carregar();
+        return;
+      }
+
+      if(generoInput === "F" && t.mulheres.length < 2){
+        t.mulheres.push({nome:nomeInput, uid:user.uid});
+        await updateDoc(doc(db,"times",t.id), t);
+
+        mostrarToast("⚡ Você entrou no time!");
+        document.getElementById("enterSound").play();
+        carregar();
+        return;
+      }
+    }
+
+    // 🆕 criar novo time
+    if(timesCategoria.length < 3){
+
+      let novo = {
+        categoria: categoriaInput,
+        homens: generoInput==="M" ? [{nome:nomeInput, uid:user.uid}] : [],
+        mulheres: generoInput==="F" ? [{nome:nomeInput, uid:user.uid}] : []
+      };
+
+      await addDoc(collection(db,"times"), novo);
+
+      mostrarToast("🔥 Novo time criado!");
+      document.getElementById("enterSound").play();
+      carregar();
+
+    } else {
+      throw new Error("Limite de times atingido nessa categoria");
+    }
+
+  } catch(err) {
+
+    mostrarToast("⚠️ " + err.message);
+
+  } finally {
+
     carregando = false;
-    btn.disabled = false;
     btn.innerText = "ENTRAR / CRIAR TIME";
-    return;
-}
-  
-  const generoInput = document.getElementById("genero").value;
-  const categoriaInput = document.getElementById("categoria").value;
+    btn.disabled = false;
 
-
-  }
-
-  const snapshot = await getDocs(collection(db, "times"));
-
-  let timesCategoria = [];
-
-for(let t of timesCategoria){
-  const todos = [...t.homens, ...t.mulheres];
-
-  if(todos.find(p => p.uid === user.uid)){
-    alert("Você já está em um time dessa categoria");
-    carregando = false
-    return;
-  }
-}
-  
-  snapshot.forEach(d=>{
-    if(d.data().categoria === categoriaInput){
-      timesCategoria.push({id:d.id, ...d.data()});
-    }
-  });
-
-  // tentar entrar em time existente
-  for(let t of timesCategoria){
-
-    if(generoInput === "M" && t.homens.length < 2){
-      t.homens.push({nome:nomeInput, uid:user.uid});
-      await updateDoc(doc(db,"times",t.id), t);
-      mostrarToast("⚡ Você entrou no time!");
-      document.getElementById("enterSound").play();
-      carregar();
-      carregando = false
-      return;
-    }
-
-    if(generoInput === "F" && t.mulheres.length < 2){
-      t.mulheres.push({nome:nomeInput, uid:user.uid});
-      await updateDoc(doc(db,"times",t.id), t);
-      mostrarToast("⚡ Você entrou no time!");
-      document.getElementById("enterSound").play();
-      carregar();
-      carregando = false
-      return;
-    }
-  }
-
-  // criar novo time
-  if(timesCategoria.length < 3){
-
-    let novo = {
-      categoria: categoriaInput,
-      homens: generoInput==="M" ? [{nome:nomeInput, uid:user.uid}] : [],
-      mulheres: generoInput==="F" ? [{nome:nomeInput, uid:user.uid}] : []
-    };
-
-    await addDoc(collection(db,"times"), novo);
-    mostrarToast("🔥 Novo time criado! Você é o primeiro jogador");
-    document.getElementById("enterSound").play();
-    carregar();
-
-  } else {
-    alert("Limite de times atingido nessa categoria");
   }
 };
 
