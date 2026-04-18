@@ -44,8 +44,17 @@ window.login = async () => {
 // 🔹 ENTRAR / CRIAR TIME (VERSÃO LIMPA PRO)
 window.entrarTime = async () => {
 
-  if(carregando) return;
+window.entrarTime = async () => {
+
+  if(carregando){
+    return;
+  }
+
   carregando = true;
+
+  
+ // if(carregando) return;
+ // carregando = true;
 
   const btn = document.getElementById("btnEntrar");
   btn.innerText = "PROCESSANDO...";
