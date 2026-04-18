@@ -28,47 +28,55 @@ window.login = async () => {
 
 window.entrarTime = async () => {
 
-  const nome = nome.value;
-  const genero = genero.value;
-  const categoria = categoria.value;
+  const nomeInput = document.getElementById("nome").value;
+  const generoInput = document.getElementById("genero").value;
+  const categoriaInput = document.getElementById("categoria").value;
+
+  if(!nomeInput){
+    alert("Digite seu nome");
+    return;
+  }
 
   const snapshot = await getDocs(collection(db, "times"));
 
   let timesCategoria = [];
+
   snapshot.forEach(d=>{
-    if(d.data().categoria === categoria){
+    if(d.data().categoria === categoriaInput){
       timesCategoria.push({id:d.id, ...d.data()});
     }
   });
 
-  // tentar entrar em time incompleto
+  // tentar entrar em time existente
   for(let t of timesCategoria){
 
-    if(genero === "M" && t.homens.length < 2){
-      t.homens.push({nome, uid:user.uid});
+    if(generoInput === "M" && t.homens.length < 2){
+      t.homens.push({nome:nomeInput, uid:user.uid});
       await updateDoc(doc(db,"times",t.id), t);
       carregar();
       return;
     }
 
-    if(genero === "F" && t.mulheres.length < 2){
-      t.mulheres.push({nome, uid:user.uid});
+    if(generoInput === "F" && t.mulheres.length < 2){
+      t.mulheres.push({nome:nomeInput, uid:user.uid});
       await updateDoc(doc(db,"times",t.id), t);
       carregar();
       return;
     }
   }
 
-  // criar novo time se puder
+  // criar novo time
   if(timesCategoria.length < 3){
+
     let novo = {
-      categoria,
-      homens: genero==="M" ? [{nome, uid:user.uid}] : [],
-      mulheres: genero==="F" ? [{nome, uid:user.uid}] : []
+      categoria: categoriaInput,
+      homens: generoInput==="M" ? [{nome:nomeInput, uid:user.uid}] : [],
+      mulheres: generoInput==="F" ? [{nome:nomeInput, uid:user.uid}] : []
     };
 
     await addDoc(collection(db,"times"), novo);
     carregar();
+
   } else {
     alert("Limite de times atingido nessa categoria");
   }
