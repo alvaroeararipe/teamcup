@@ -87,6 +87,7 @@ for(let t of timesCategoria){
       t.homens.push({nome:nomeInput, uid:user.uid});
       await updateDoc(doc(db,"times",t.id), t);
       mostrarToast("⚡ Você entrou no time!");
+      document.getElementById("enterSound").play();
       carregar();
       return;
     }
@@ -95,6 +96,7 @@ for(let t of timesCategoria){
       t.mulheres.push({nome:nomeInput, uid:user.uid});
       await updateDoc(doc(db,"times",t.id), t);
       mostrarToast("⚡ Você entrou no time!");
+      document.getElementById("enterSound").play();
       carregar();
       return;
     }
@@ -111,6 +113,7 @@ for(let t of timesCategoria){
 
     await addDoc(collection(db,"times"), novo);
     mostrarToast("🔥 Novo time criado! Você é o primeiro jogador");
+    document.getElementById("enterSound").play();
     carregar();
 
   } else {
