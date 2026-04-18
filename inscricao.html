@@ -1,46 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
+
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
-<title>Inscrição</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Cup - Inscrição</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<audio id="enterSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>  
-  
-<h2>Montar Time</h2>
+  <!-- 🔥 HUD TOPO -->
+  <div class="hud">
+    <span>🎮 TEAM CUP</span>
+    <span id="userInfo"></span>
+  </div>
 
-<button id="btnLogin" class="btn">Login com Google</button>
+  <!-- 🔥 LOADING -->
+  <div id="loading">
+    <h1>⚡ CARREGANDO TORNEIO...</h1>
+  </div>
 
-<div class="card">
+  <h2>Montar Time</h2>
 
-<input id="nome" placeholder="Nome"><br>
+  <!-- 🔐 LOGIN -->
+  <button id="btnLogin" class="btn">Login com Google</button>
 
-<select id="genero">
-<option value="M">Homem</option>
-<option value="F">Mulher</option>
-</select>
+  <!-- 🧾 FORMULÁRIO -->
+  <div class="card">
 
-<select id="categoria">
-<option value="B">B</option>
-<option value="C">C</option>
-<option value="D">D</option>
-<option value="E">E</option>
-</select>
+    <input id="nome" placeholder="Seu nome"><br>
 
-<button id="btnEntrar" onclick="entrarTime()" class="btn">
-ENTRAR / CRIAR TIME
-</button>
+    <select id="genero">
+      <option value="M">Homem</option>
+      <option value="F">Mulher</option>
+    </select>
 
-</div>
+    <select id="categoria">
+      <option value="B">Categoria B</option>
+      <option value="C">Categoria C</option>
+      <option value="D">Categoria D</option>
+      <option value="E">Categoria E</option>
+    </select>
 
-<div id="times"></div>
+    <br><br>
 
-<div id="toast"></div>
-  
-<script type="module" src="app.js"></script>
+    <button id="btnEntrar" class="btn">ENTRAR / CRIAR TIME</button>
+
+  </div>
+
+  <!-- 🧠 LISTA DE TIMES -->
+  <div id="times"></div>
+
+  <!-- 🔔 TOAST -->
+  <div id="toast"></div>
+
+  <!-- 🔊 SOM -->
+  <audio id="enterSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
+
+  <!-- 🚀 SCRIPT -->
+  <script type="module" src="app.js"></script>
 
 </body>
+
 </html>
