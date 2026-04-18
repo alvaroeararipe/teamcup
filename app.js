@@ -28,6 +28,24 @@ window.login = async () => {
   alert("Logado como: " + user.email);
 };
 
+window.sairTime = async (timeId) => {
+
+  const ref = doc(db, "times", timeId);
+  const snapshot = await getDocs(collection(db, "times"));
+
+  snapshot.forEach(async d => {
+    if(d.id === timeId){
+      let t = d.data();
+
+      t.homens = t.homens.filter(p => p.uid !== user.uid);
+      t.mulheres = t.mulheres.filter(p => p.uid !== user.uid);
+
+      await updateDoc(ref, t);
+      carregar();
+    }
+  });
+};
+
 window.entrarTime = async () => {
 
   if(!user){
@@ -98,18 +116,35 @@ for(let t of timesCategoria){
 };
 
 async function carregar(){
+
   const snapshot = await getDocs(collection(db, "times"));
 
   let html = "<h3>Times</h3>";
 
   snapshot.forEach(d=>{
+
     const t = d.data();
 
-    html += `<div class="card">
-    <b>Categoria ${t.categoria}</b><br>
-    Homens: ${t.homens.map(h=>h.nome).join(", ")}<br>
-    Mulheres: ${t.mulheres.map(m=>m.nome).join(", ")}
-    </div>`;
+    const total = t.homens.length + t.mulheres.length;
+    const completo = total === 4;
+
+    html += `
+    <div class="card">
+      <b>Categoria ${t.categoria}</b><br><br>
+
+      👨 Homens: ${t.homens.map(h=>h.nome).join(", ") || "-" }<br>
+      👩 Mulheres: ${t.mulheres.map(m=>m.nome).join(", ") || "-" }<br><br>
+
+      <b>${completo ? "🔥 COMPLETO" : "⏳ FALTANDO JOGADORES"}</b><br><br>
+
+      ${
+        [...t.homens, ...t.mulheres].some(p=>p.uid === user?.uid)
+        ? `<button onclick="sairTime('${d.id}')" class="btn">Sair do time</button>`
+        : ""
+      }
+
+    </div>
+    `;
   });
 
   document.getElementById("times").innerHTML = html;
