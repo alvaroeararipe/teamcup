@@ -88,7 +88,10 @@ window.entrarTime = async () => {
 
       if(generoInput === "M" && t.homens.length < 2){
         t.homens.push({nome:nomeInput, uid:user.uid});
-        await updateDoc(doc(db,"times",t.id), t);
+        await updateDoc(doc(db,"times",t.id), {
+  homens: t.homens,
+  mulheres: t.mulheres
+});
 
         sucessoEntrada("⚡ Você entrou no time!");
         return;
@@ -120,23 +123,19 @@ window.entrarTime = async () => {
       throw new Error("Limite de times atingido");
     }
 
-  } catch(err) {
+} catch(err) {
 
   console.error("ERRO REAL:", err);
-
   alert("ERRO: " + err.message);
-
   mostrarToast("⚠️ " + err.message);
 
+} finally {
+
+  carregando = false;
+  btn.innerText = "ENTRAR / CRIAR TIME";
+  btn.disabled = false;
+
 }
-
-  } finally {
-
-    carregando = false;
-    btn.innerText = "ENTRAR / CRIAR TIME";
-    btn.disabled = false;
-
-  }
 };
 
 // 🔹 SUCESSO (som + toast + reload)
@@ -187,6 +186,9 @@ async function carregar(){
   snapshot.forEach(d=>{
 
     const t = d.data();
+
+t.homens = t.homens || [];
+t.mulheres = t.mulheres || [];
 
     const total = t.homens.length + t.mulheres.length;
     const completo = total === 4;
