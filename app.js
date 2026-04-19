@@ -122,8 +122,13 @@ window.entrarTime = async () => {
 
   } catch(err) {
 
-    mostrarToast("⚠️ " + err.message);
-    console.error(err);
+  console.error("ERRO REAL:", err);
+
+  alert("ERRO: " + err.message);
+
+  mostrarToast("⚠️ " + err.message);
+
+}
 
   } finally {
 
