@@ -67,8 +67,9 @@ window.entrarTime = async () => {
     snapshot.forEach(d => {
       let t = d.data();
 
-      t.homens = t.homens || [];
-      t.mulheres = t.mulheres || [];
+// 🔥 blindagem contra dados quebrados
+t.homens = Array.isArray(t.homens) ? t.homens : [];
+t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
 
       if (t.categoria === categoria) {
         timesCategoria.push({ id: d.id, ...t });
