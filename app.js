@@ -8,7 +8,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDhOIXYBqBELD0LDuGamKotPeW_qBu70WY",
   authDomain: "teamcup-a3af2.firebaseapp.com",
   projectId: "teamcup-a3af2",
-  storageBucket: "teamcup-a3af2.firebasestorage.app",
+  storageBucket: "teamcup-a3af2.appspot.com"",
   messagingSenderId: "49913899541",
   appId: "1:49913899541:web:817c26257e72f307d7fc1c",
   measurementId: "G-Z0VTN373FN"
