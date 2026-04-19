@@ -43,9 +43,6 @@ window.login = async () => {
 
 // 🔹 ENTRAR / CRIAR TIME (VERSÃO LIMPA PRO)
 window.entrarTime = async () => {
-
-window.entrarTime = async () => {
-
   
   if(carregando) return;
   carregando = true;
