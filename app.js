@@ -3,241 +3,200 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 🔹 CONFIG FIREBASE (COLE A SUA AQUI)
+// 🔹 CONFIG FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyDhOIXYBqBELD0LDuGamKotPeW_qBu70WY",
   authDomain: "teamcup-a3af2.firebaseapp.com",
   projectId: "teamcup-a3af2",
   storageBucket: "teamcup-a3af2.appspot.com",
   messagingSenderId: "49913899541",
-  appId: "1:49913899541:web:817c26257e72f307d7fc1c",
-  measurementId: "G-Z0VTN373FN"
+  appId: "1:49913899541:web:817c26257e72f307d7fc1c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 🔹 VARIÁVEIS
 let user = null;
 let carregando = false;
 
-// 🔹 LOGIN GOOGLE
+// 🔹 LOGIN
 window.login = async () => {
   try {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
 
     user = result.user;
-
     document.getElementById("userInfo").innerText = user.email;
 
-    mostrarToast("🔥 Logado com sucesso");
+    alert("Login OK");
 
   } catch (err) {
-    mostrarToast("Erro no login");
+    alert("Erro login: " + err.message);
     console.error(err);
   }
 };
 
-// 🔹 ENTRAR / CRIAR TIME (VERSÃO LIMPA PRO)
+// 🔹 ENTRAR TIME
 window.entrarTime = async () => {
-  
-  if(carregando) return;
-  carregando = true;
 
-  const btn = document.getElementById("btnEntrar");
-  btn.innerText = "PROCESSANDO...";
-  btn.disabled = true;
+  if (carregando) return;
 
   try {
 
-    if(!user){
-      throw new Error("Faça login primeiro");
+    if (!user) {
+      alert("Faça login primeiro");
+      return;
     }
 
-    const nomeInput = document.getElementById("nome").value.trim();
-    const generoInput = document.getElementById("genero").value;
-    const categoriaInput = document.getElementById("categoria").value;
+    carregando = true;
 
-    if(!nomeInput){
-      throw new Error("Digite seu nome");
+    const nome = document.getElementById("nome").value.trim();
+    const genero = document.getElementById("genero").value;
+    const categoria = document.getElementById("categoria").value;
+
+    if (!nome) {
+      alert("Digite seu nome");
+      return;
     }
 
     const snapshot = await getDocs(collection(db, "times"));
 
     let timesCategoria = [];
 
-    snapshot.forEach(d=>{
-      if(d.data().categoria === categoriaInput){
-        timesCategoria.push({id:d.id, ...d.data()});
+    snapshot.forEach(d => {
+      let t = d.data();
+
+      t.homens = t.homens || [];
+      t.mulheres = t.mulheres || [];
+
+      if (t.categoria === categoria) {
+        timesCategoria.push({ id: d.id, ...t });
       }
     });
 
-    // 🔒 impedir duplicação
-    for(let t of timesCategoria){
+    // 🔒 evitar duplicado
+    for (let t of timesCategoria) {
       const todos = [...t.homens, ...t.mulheres];
 
-      if(todos.find(p => p.uid === user.uid)){
-        throw new Error("Você já está em um time dessa categoria");
+      if (todos.find(p => p.uid === user.uid)) {
+        alert("Você já está em um time");
+        carregando = false;
+        return;
       }
     }
 
-    // 🔄 tentar entrar em time existente
-    for(let t of timesCategoria){
+    // 🔄 entrar em time existente
+    for (let t of timesCategoria) {
 
-      if(generoInput === "M" && t.homens.length < 2){
-        t.homens.push({nome:nomeInput, uid:user.uid});
-        await updateDoc(doc(db,"times",t.id), {
-  homens: t.homens,
-  mulheres: t.mulheres
-});
+      if (genero === "M" && t.homens.length < 2) {
+        t.homens.push({ nome, uid: user.uid });
 
-        sucessoEntrada("⚡ Você entrou no time!");
+        await updateDoc(doc(db, "times", t.id), {
+          homens: t.homens
+        });
+
+        alert("Entrou no time!");
+        carregar();
+        carregando = false;
         return;
       }
 
-      if(generoInput === "F" && t.mulheres.length < 2){
-        t.mulheres.push({nome:nomeInput, uid:user.uid});
-        await updateDoc(doc(db,"times",t.id), t);
+      if (genero === "F" && t.mulheres.length < 2) {
+        t.mulheres.push({ nome, uid: user.uid });
 
-        sucessoEntrada("⚡ Você entrou no time!");
+        await updateDoc(doc(db, "times", t.id), {
+          mulheres: t.mulheres
+        });
+
+        alert("Entrou no time!");
+        carregar();
+        carregando = false;
         return;
       }
     }
 
     // 🆕 criar novo time
-    if(timesCategoria.length < 3){
+    if (timesCategoria.length < 3) {
 
       let novo = {
-        categoria: categoriaInput,
-        homens: generoInput==="M" ? [{nome:nomeInput, uid:user.uid}] : [],
-        mulheres: generoInput==="F" ? [{nome:nomeInput, uid:user.uid}] : []
+        categoria,
+        homens: genero === "M" ? [{ nome, uid: user.uid }] : [],
+        mulheres: genero === "F" ? [{ nome, uid: user.uid }] : []
       };
 
-      await addDoc(collection(db,"times"), novo);
+      await addDoc(collection(db, "times"), novo);
 
-      sucessoEntrada("🔥 Novo time criado!");
+      alert("Novo time criado!");
+      carregar();
 
     } else {
-      throw new Error("Limite de times atingido");
+      alert("Limite de times atingido");
     }
 
-} catch(err) {
-
-  console.error("ERRO REAL:", err);
-  alert("ERRO: " + err.message);
-  mostrarToast("⚠️ " + err.message);
-
-} finally {
+  } catch (err) {
+    alert("ERRO: " + err.message);
+    console.error(err);
+  }
 
   carregando = false;
-  btn.innerText = "ENTRAR / CRIAR TIME";
-  btn.disabled = false;
-
-}
 };
 
-// 🔹 SUCESSO (som + toast + reload)
-function sucessoEntrada(msg){
-  mostrarToast(msg);
-  document.getElementById("enterSound").play();
-  carregar();
-}
+// 🔹 SAIR TIME
+window.sairTime = async (id) => {
 
-// 🔹 SAIR DO TIME
-window.sairTime = async (timeId) => {
+  const ref = doc(db, "times", id);
+  const snap = await getDocs(collection(db, "times"));
 
-  const ref = doc(db, "times", timeId);
-  const snapshot = await getDocs(collection(db, "times"));
+  snap.forEach(async d => {
+    if (d.id === id) {
 
-  snapshot.forEach(async d => {
-    if(d.id === timeId){
       let t = d.data();
 
-      t.homens = t.homens.filter(p => p.uid !== user.uid);
-      t.mulheres = t.mulheres.filter(p => p.uid !== user.uid);
+      t.homens = (t.homens || []).filter(p => p.uid !== user.uid);
+      t.mulheres = (t.mulheres || []).filter(p => p.uid !== user.uid);
 
-      await updateDoc(ref, t);
-      mostrarToast("Saiu do time");
+      await updateDoc(ref, {
+        homens: t.homens,
+        mulheres: t.mulheres
+      });
+
+      alert("Saiu do time");
       carregar();
     }
   });
 };
 
-// 🔹 TOAST
-function mostrarToast(msg){
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.style.opacity = 1;
-
-  setTimeout(()=>{
-    t.style.opacity = 0;
-  },2000);
-}
-
-// 🔹 CARREGAR TIMES (UI GAMER)
-async function carregar(){
+// 🔹 CARREGAR
+async function carregar() {
 
   const snapshot = await getDocs(collection(db, "times"));
 
-  let html = "<h3>⚔️ TIMES FORMADOS</h3>";
+  let html = "";
 
-  snapshot.forEach(d=>{
+  snapshot.forEach(d => {
 
-    const t = d.data();
+    let t = d.data();
 
-t.homens = t.homens || [];
-t.mulheres = t.mulheres || [];
-
-    const total = t.homens.length + t.mulheres.length;
-    const completo = total === 4;
-
-    const render = (lista) => {
-      return lista.map(p=>{
-        if(p.uid === user?.uid){
-          return `<span class="me">🔥 ${p.nome} (VOCÊ)</span>`;
-        }
-        return p.nome;
-      }).join(", ") || "-";
-    };
+    t.homens = t.homens || [];
+    t.mulheres = t.mulheres || [];
 
     html += `
-    <div class="card fade">
-      <h3>Categoria ${t.categoria}</h3>
-
-      👨 ${render(t.homens)}<br>
-      👩 ${render(t.mulheres)}<br><br>
-
-      <div class="${completo ? 'status-ok' : 'status-wait'}">
-        ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO ⏳'}
-      </div><br>
-
-      ${
-        [...t.homens, ...t.mulheres].some(p=>p.uid === user?.uid)
-        ? `<button onclick="sairTime('${d.id}')" class="btn">SAIR DO TIME</button>`
-        : ""
-      }
-    </div>
+      <div style="border:1px solid white; margin:10px; padding:10px;">
+        <b>Categoria ${t.categoria}</b><br>
+        👨 ${t.homens.map(p=>p.nome).join(", ") || "-"}<br>
+        👩 ${t.mulheres.map(p=>p.nome).join(", ") || "-"}<br>
+        <button onclick="sairTime('${d.id}')">Sair</button>
+      </div>
     `;
   });
 
   document.getElementById("times").innerHTML = html;
 }
 
-// 🔹 EFEITO CLICK ENERGIA
-document.addEventListener("click", e => {
-  const el = document.createElement("div");
-  el.className = "energy";
-  el.style.left = e.clientX + "px";
-  el.style.top = e.clientY + "px";
-  document.body.appendChild(el);
-
-  setTimeout(()=>el.remove(),600);
-});
-
-// 🔹 INICIAR
+// 🔹 INIT
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btnLogin").addEventListener("click", login);
+  document.getElementById("btnEntrar").addEventListener("click", entrarTime);
   carregar();
 });
