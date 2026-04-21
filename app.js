@@ -258,6 +258,7 @@ async function carregar(){
   lista.forEach(t=>{
 
     const total = t.homens.length + t.mulheres.length;
+    const progresso = (total / 4) * 100;
     const completo = total === 4;
 
     const render = (lista) => {
@@ -282,7 +283,8 @@ async function carregar(){
       <div class="${completo ? 'status-ok' : 'status-wait'}">
         ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO ⏳'}
       </div><br>
-
+<div class="progress-bar">
+  <div class="progress
      ${
   !estouNoTime
   ? `<button 
