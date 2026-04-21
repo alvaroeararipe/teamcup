@@ -185,13 +185,13 @@ async function carregar(){
 
   snapshot.forEach(d=>{
 
-const t = d.data();
+    let t = d.data();
 
-// 🔥 blindagem contra dados quebrados
-t.homens = Array.isArray(t.homens) ? t.homens : [];
-t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
+    // 🔥 PROTEÇÃO TOTAL (resolve seu erro)
+    let homens = Array.isArray(t.homens) ? t.homens : [];
+    let mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
 
-    const total = t.homens.length + t.mulheres.length;
+    const total = homens.length + mulheres.length;
     const completo = total === 4;
 
     const render = (lista) => {
@@ -205,17 +205,17 @@ t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
 
     html += `
     <div class="card fade">
-      <h3>Categoria ${t.categoria}</h3>
+      <h3>Categoria ${t.categoria || "-"}</h3>
 
-      👨 ${render(t.homens)}<br>
-      👩 ${render(t.mulheres)}<br><br>
+      👨 ${render(homens)}<br>
+      👩 ${render(mulheres)}<br><br>
 
       <div class="${completo ? 'status-ok' : 'status-wait'}">
         ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO ⏳'}
       </div><br>
 
       ${
-        [...t.homens, ...t.mulheres].some(p=>p.uid === user?.uid)
+        [...homens, ...mulheres].some(p=>p.uid === user?.uid)
         ? `<button onclick="sairTime('${d.id}')" class="btn">SAIR DO TIME</button>`
         : ""
       }
