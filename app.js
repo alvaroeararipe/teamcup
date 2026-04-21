@@ -77,7 +77,10 @@ t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
     });
 
     // 🔒 evitar duplicado
-    for (let t of timesCategoria) {
+    for(let t of timesCategoria){
+
+  t.homens = Array.isArray(t.homens) ? t.homens : [];
+  t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
       const todos = [...t.homens, ...t.mulheres];
 
       if (todos.find(p => p.uid === user.uid)) {
@@ -88,7 +91,10 @@ t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
     }
 
     // 🔄 entrar em time existente
-    for (let t of timesCategoria) {
+    for(let t of timesCategoria){
+
+  t.homens = Array.isArray(t.homens) ? t.homens : [];
+  t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
 
       if (genero === "M" && t.homens.length < 2) {
         t.homens.push({ nome, uid: user.uid });
