@@ -179,8 +179,14 @@ async function carregar() {
   const snapshot = await getDocs(collection(db, "times"));
   let html = "";
 
-  snapshot.forEach(d => {
-    let t = d.data();
+const docs = [];
+snapshot.forEach(d => docs.push({id: d.id, ...d.data()}));
+
+// 🔥 ordena por categoria (B, C, D, E...)
+docs.sort((a, b) => (a.categoria || "").localeCompare(b.categoria || ""));
+  
+  docs.forEach(t=>{
+  // eu mesmo removi isso  let t = d.data();
 
     // Ensure fields are arrays even if the DB has a different type (like a string)
     const homens = Array.isArray(t.homens) ? t.homens : [];
