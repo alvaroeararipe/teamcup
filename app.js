@@ -176,23 +176,21 @@ window.sairTime = async (id) => {
 
 // 🔹 CARREGAR
 async function carregar() {
-
   const snapshot = await getDocs(collection(db, "times"));
-
   let html = "";
 
   snapshot.forEach(d => {
-
     let t = d.data();
 
-    t.homens = t.homens || [];
-    t.mulheres = t.mulheres || [];
+    // Ensure fields are arrays even if the DB has a different type (like a string)
+    const homens = Array.isArray(t.homens) ? t.homens : [];
+    const mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
 
     html += `
       <div style="border:1px solid white; margin:10px; padding:10px;">
-        <b>Categoria ${t.categoria}</b><br>
-        👨 ${t.homens.map(p=>p.nome).join(", ") || "-"}<br>
-        👩 ${t.mulheres.map(p=>p.nome).join(", ") || "-"}<br>
+        <b>Categoria ${t.categoria || "N/A"}</b><br>
+        👨 ${homens.map(p => p.nome).join(", ") || "-"}<br>
+        👩 ${mulheres.map(p => p.nome).join(", ") || "-"}<br>
         <button onclick="sairTime('${d.id}')">Sair</button>
       </div>
     `;
