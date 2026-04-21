@@ -285,16 +285,16 @@ async function carregar(){
       </div><br>
 <div class="progress-bar">
   <div class="progress
-     ${
+${
   !estouNoTime
   ? `<button 
-        onclick="${completo ? '' : `entrarTimeExistente('${t.id}')`}" 
+        onclick="entrarTimeExistente('${t.id}')"
         class="btn ${completo ? 'btn-disabled' : ''}"
         ${completo ? 'disabled' : ''}
      >
         ${completo ? 'TIME LOTADO 🔒' : 'ENTRAR NESTE TIME'}
      </button>`
-  : ""
+  : `<button onclick="sairTime('${t.id}')" class="btn">SAIR DO TIME</button>`
 }
 
       ${
