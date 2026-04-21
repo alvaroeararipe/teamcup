@@ -283,11 +283,17 @@ async function carregar(){
         ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO ⏳'}
       </div><br>
 
-      ${
-        !estouNoTime && !completo
-        ? `<button onclick="entrarTimeExistente('${t.id}')" class="btn">ENTRAR NESTE TIME</button>`
-        : ""
-      }
+     ${
+  !estouNoTime
+  ? `<button 
+        onclick="${completo ? '' : `entrarTimeExistente('${t.id}')`}" 
+        class="btn ${completo ? 'btn-disabled' : ''}"
+        ${completo ? 'disabled' : ''}
+     >
+        ${completo ? 'TIME LOTADO 🔒' : 'ENTRAR NESTE TIME'}
+     </button>`
+  : ""
+}
 
       ${
         estouNoTime
