@@ -150,7 +150,7 @@ t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
 };
 
 // 🔹 SAIR TIME
-window.sairTime = async (id) => {
+window.sairTime = async (TimeId) => {
 
   const ref = doc(db, "times", id);
   const snap = await getDocs(collection(db, "times"));
@@ -174,37 +174,133 @@ window.sairTime = async (id) => {
   });
 };
 
+window.entrarTimeExistente = async (timeId) => {
+
+  try {
+
+    if(!user){
+      throw new Error("Faça login primeiro");
+    }
+
+    const nomeInput = document.getElementById("nome").value.trim();
+    const generoInput = document.getElementById("genero").value;
+
+    if(!nomeInput){
+      throw new Error("Digite seu nome");
+    }
+
+    const ref = doc(db, "times", timeId);
+    const snapshot = await getDocs(collection(db, "times"));
+
+    snapshot.forEach(async d => {
+      if(d.id === timeId){
+
+        let t = d.data();
+
+        t.homens = Array.isArray(t.homens) ? t.homens : [];
+        t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
+
+        // impedir duplicação
+        const todos = [...t.homens, ...t.mulheres];
+        if(todos.find(p => p.uid === user.uid)){
+          throw new Error("Você já está neste time");
+        }
+
+        if(generoInput === "M" && t.homens.length < 2){
+          t.homens.push({nome:nomeInput, uid:user.uid});
+        }
+
+        if(generoInput === "F" && t.mulheres.length < 2){
+          t.mulheres.push({nome:nomeInput, uid:user.uid});
+        }
+
+        await updateDoc(ref, {
+          homens: t.homens,
+          mulheres: t.mulheres
+        });
+
+        sucessoEntrada("⚡ Você entrou no time!");
+      }
+    });
+
+  } catch(err){
+    alert(err.message);
+    console.error(err);
+  }
+};
+
 // 🔹 CARREGAR
-async function carregar() {
+async function carregar(){
+
   const snapshot = await getDocs(collection(db, "times"));
-  let html = "";
 
-const docs = [];
-snapshot.forEach(d => docs.push({id: d.id, ...d.data()}));
+  let lista = [];
 
-// 🔥 ordena por categoria (B, C, D, E...)
-docs.sort((a, b) => (a.categoria || "").localeCompare(b.categoria || ""));
-  
-  docs.forEach(t=>{
-  // eu mesmo removi isso  let t = d.data();
+  snapshot.forEach(d=>{
+    const t = d.data();
 
-    // Ensure fields are arrays even if the DB has a different type (like a string)
-    const homens = Array.isArray(t.homens) ? t.homens : [];
-    const mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
+    lista.push({
+      id: d.id,
+      categoria: t.categoria,
+      homens: Array.isArray(t.homens) ? t.homens : [],
+      mulheres: Array.isArray(t.mulheres) ? t.mulheres : []
+    });
+  });
+
+  // 🔥 ORDENAR CATEGORIAS
+  lista.sort((a,b)=>{
+    const ordem = ["B","C","D","E"];
+    return ordem.indexOf(a.categoria) - ordem.indexOf(b.categoria);
+  });
+
+  let html = "<h3>⚔️ TIMES FORMADOS</h3>";
+
+  lista.forEach(t=>{
+
+    const total = t.homens.length + t.mulheres.length;
+    const completo = total === 4;
+
+    const render = (lista) => {
+      return lista.map(p=>{
+        if(p.uid === user?.uid){
+          return `<span class="me">🔥 ${p.nome} (VOCÊ)</span>`;
+        }
+        return p.nome;
+      }).join(", ") || "-";
+    };
+
+    const estouNoTime = [...t.homens, ...t.mulheres]
+      .some(p => p.uid === user?.uid);
 
     html += `
-      <div style="border:1px solid white; margin:10px; padding:10px;">
-        <b>Categoria ${t.categoria || "N/A"}</b><br>
-        👨 ${homens.map(p => p.nome).join(", ") || "-"}<br>
-        👩 ${mulheres.map(p => p.nome).join(", ") || "-"}<br>
-        <button onclick="sairTime('${d.id}')">Sair</button>
-      </div>
+    <div class="card fade">
+      <h3>Categoria ${t.categoria}</h3>
+
+      👨 ${render(t.homens)}<br>
+      👩 ${render(t.mulheres)}<br><br>
+
+      <div class="${completo ? 'status-ok' : 'status-wait'}">
+        ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO ⏳'}
+      </div><br>
+
+      ${
+        !estouNoTime && !completo
+        ? `<button onclick="entrarTimeExistente('${t.id}')" class="btn">ENTRAR NESTE TIME</button>`
+        : ""
+      }
+
+      ${
+        estouNoTime
+        ? `<button onclick="sairTime('${t.id}')" class="btn">SAIR DO TIME</button>`
+        : ""
+      }
+
+    </div>
     `;
   });
 
   document.getElementById("times").innerHTML = html;
 }
-
 // 🔹 INIT
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btnLogin").addEventListener("click", login);
