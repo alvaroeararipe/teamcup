@@ -1,5 +1,3 @@
-window.entrarTimeExistente = window.entrarTimeExistente;
-
 // 🔹 IMPORTS FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -7,7 +5,7 @@ import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https
 
 // 🔹 CONFIG FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyDhOIXYBqBELD0LDuGamKotPeW_qBu70WY",
+  apiKey: "AIzaSy...",
   authDomain: "teamcup-a3af2.firebaseapp.com",
   projectId: "teamcup-a3af2",
   storageBucket: "teamcup-a3af2.appspot.com",
@@ -35,21 +33,17 @@ window.login = async () => {
 
   } catch (err) {
     alert("Erro login: " + err.message);
-    console.error(err);
   }
 };
 
-// 🔹 ENTRAR TIME
+// 🔹 CRIAR NOVO TIME (SEM ENTRAR AUTOMÁTICO)
 window.entrarTime = async () => {
 
   if (carregando) return;
 
   try {
 
-    if (!user) {
-      alert("Faça login primeiro");
-      return;
-    }
+    if (!user) return alert("Faça login primeiro");
 
     carregando = true;
 
@@ -57,75 +51,33 @@ window.entrarTime = async () => {
     const genero = document.getElementById("genero").value;
     const categoria = document.getElementById("categoria").value;
 
-    if (!nome) {
-      alert("Digite seu nome");
-      return;
-    }
+    if (!nome) return alert("Digite seu nome");
 
     const snapshot = await getDocs(collection(db, "times"));
 
     let timesCategoria = [];
 
     snapshot.forEach(d => {
-const t = d.data();
+      const t = d.data();
 
-// 🔥 blindagem contra dados quebrados
-t.homens = Array.isArray(t.homens) ? t.homens : [];
-t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
+      t.homens = Array.isArray(t.homens) ? t.homens : [];
+      t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
 
       if (t.categoria === categoria) {
         timesCategoria.push({ id: d.id, ...t });
       }
     });
 
-    // 🔒 evitar duplicado
-    for(let t of timesCategoria){
-
-  t.homens = Array.isArray(t.homens) ? t.homens : [];
-  t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
+    // 🔒 impedir duplicação
+    for (let t of timesCategoria) {
       const todos = [...t.homens, ...t.mulheres];
-
       if (todos.find(p => p.uid === user.uid)) {
-        alert("Você já está em um time");
         carregando = false;
-        return;
+        return alert("Você já está em um time");
       }
     }
 
-    // 🔄 entrar em time existente
-    for(let t of timesCategoria){
-
-  t.homens = Array.isArray(t.homens) ? t.homens : [];
-  t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
-
-      if (genero === "M" && t.homens.length < 2) {
-        t.homens.push({ nome, uid: user.uid });
-
-        await updateDoc(doc(db, "times", t.id), {
-          homens: t.homens
-        });
-
-        alert("Entrou no time!");
-        carregar();
-        carregando = false;
-        return;
-      }
-
-      if (genero === "F" && t.mulheres.length < 2) {
-        t.mulheres.push({ nome, uid: user.uid });
-
-        await updateDoc(doc(db, "times", t.id), {
-          mulheres: t.mulheres
-        });
-
-        alert("Entrou no time!");
-        carregar();
-        carregando = false;
-        return;
-      }
-    }
-
-    // 🆕 criar novo time
+    // 🆕 criar novo time SEM tentar entrar em outro
     if (timesCategoria.length < 3) {
 
       let novo = {
@@ -145,20 +97,73 @@ t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
 
   } catch (err) {
     alert("ERRO: " + err.message);
-    console.error(err);
   }
 
   carregando = false;
 };
 
-// 🔹 SAIR TIME
-window.sairTime = async (TimeId) => {
+// 🔹 ENTRAR EM TIME EXISTENTE
+window.entrarTimeExistente = async (timeId) => {
 
-  const ref = doc(db, "times", id);
-  const snap = await getDocs(collection(db, "times"));
+  try {
 
-  snap.forEach(async d => {
-    if (d.id === id) {
+    if (!user) return alert("Faça login primeiro");
+
+    const nome = document.getElementById("nome").value.trim();
+    const genero = document.getElementById("genero").value;
+
+    if (!nome) return alert("Digite seu nome");
+
+    const ref = doc(db, "times", timeId);
+    const snapshot = await getDocs(collection(db, "times"));
+
+    snapshot.forEach(async d => {
+
+      if (d.id === timeId) {
+
+        let t = d.data();
+
+        t.homens = Array.isArray(t.homens) ? t.homens : [];
+        t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
+
+        const todos = [...t.homens, ...t.mulheres];
+
+        if (todos.find(p => p.uid === user.uid)) {
+          return alert("Você já está neste time");
+        }
+
+        if (genero === "M" && t.homens.length < 2) {
+          t.homens.push({ nome, uid: user.uid });
+        }
+
+        if (genero === "F" && t.mulheres.length < 2) {
+          t.mulheres.push({ nome, uid: user.uid });
+        }
+
+        await updateDoc(ref, {
+          homens: t.homens,
+          mulheres: t.mulheres
+        });
+
+        alert("Entrou no time!");
+        carregar();
+      }
+    });
+
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+// 🔹 SAIR DO TIME (CORRIGIDO)
+window.sairTime = async (timeId) => {
+
+  const ref = doc(db, "times", timeId);
+  const snapshot = await getDocs(collection(db, "times"));
+
+  snapshot.forEach(async d => {
+
+    if (d.id === timeId) {
 
       let t = d.data();
 
@@ -176,69 +181,14 @@ window.sairTime = async (TimeId) => {
   });
 };
 
-window.entrarTimeExistente = async (timeId) => {
-
-  try {
-
-    if(!user){
-      throw new Error("Faça login primeiro");
-    }
-
-    const nomeInput = document.getElementById("nome").value.trim();
-    const generoInput = document.getElementById("genero").value;
-
-    if(!nomeInput){
-      throw new Error("Digite seu nome");
-    }
-
-    const ref = doc(db, "times", timeId);
-    const snapshot = await getDocs(collection(db, "times"));
-
-    snapshot.forEach(async d => {
-      if(d.id === timeId){
-
-        let t = d.data();
-
-        t.homens = Array.isArray(t.homens) ? t.homens : [];
-        t.mulheres = Array.isArray(t.mulheres) ? t.mulheres : [];
-
-        // impedir duplicação
-        const todos = [...t.homens, ...t.mulheres];
-        if(todos.find(p => p.uid === user.uid)){
-          throw new Error("Você já está neste time");
-        }
-
-        if(generoInput === "M" && t.homens.length < 2){
-          t.homens.push({nome:nomeInput, uid:user.uid});
-        }
-
-        if(generoInput === "F" && t.mulheres.length < 2){
-          t.mulheres.push({nome:nomeInput, uid:user.uid});
-        }
-
-        await updateDoc(ref, {
-          homens: t.homens,
-          mulheres: t.mulheres
-        });
-
-        sucessoEntrada("⚡ Você entrou no time!");
-      }
-    });
-
-  } catch(err){
-    alert(err.message);
-    console.error(err);
-  }
-};
-
-// 🔹 CARREGAR
-async function carregar(){
+// 🔹 CARREGAR TIMES (TOTALMENTE CORRIGIDO)
+async function carregar() {
 
   const snapshot = await getDocs(collection(db, "times"));
 
   let lista = [];
 
-  snapshot.forEach(d=>{
+  snapshot.forEach(d => {
     const t = d.data();
 
     lista.push({
@@ -249,28 +199,23 @@ async function carregar(){
     });
   });
 
-  // 🔥 ORDENAR CATEGORIAS
-  lista.sort((a,b)=>{
-    const ordem = ["B","C","D","E"];
-    return ordem.indexOf(a.categoria) - ordem.indexOf(b.categoria);
-  });
+  // 🔥 ordenar categorias
+  const ordem = ["B", "C", "D", "E"];
+  lista.sort((a, b) => ordem.indexOf(a.categoria) - ordem.indexOf(b.categoria));
 
   let html = "<h3>⚔️ TIMES FORMADOS</h3>";
 
-  lista.forEach(t=>{
+  lista.forEach(t => {
 
     const total = t.homens.length + t.mulheres.length;
-    const progresso = (total / 4) * 100;
     const completo = total === 4;
 
-    const render = (lista) => {
-      return lista.map(p=>{
-        if(p.uid === user?.uid){
-          return `<span class="me">🔥 ${p.nome} (VOCÊ)</span>`;
-        }
-        return p.nome;
-      }).join(", ") || "-";
-    };
+    const render = (arr) =>
+      arr.map(p =>
+        p.uid === user?.uid
+          ? `<span class="me">🔥 ${p.nome} (VOCÊ)</span>`
+          : p.nome
+      ).join(", ") || "-";
 
     const estouNoTime = [...t.homens, ...t.mulheres]
       .some(p => p.uid === user?.uid);
@@ -285,24 +230,17 @@ async function carregar(){
       <div class="${completo ? 'status-ok' : 'status-wait'}">
         ${completo ? 'TIME COMPLETO 🔥' : 'AGUARDANDO ⏳'}
       </div><br>
-<div class="progress-bar">
-  <div class="progress
-${
-  !estouNoTime
-  ? `<button 
-        onclick="entrarTimeExistente('${t.id}')"
-        class="btn ${completo ? 'btn-disabled' : ''}"
-        ${completo ? 'disabled' : ''}
-     >
-        ${completo ? 'TIME LOTADO 🔒' : 'ENTRAR NESTE TIME'}
-     </button>`
-  : `<button onclick="sairTime('${t.id}')" class="btn">SAIR DO TIME</button>`
-}
 
       ${
-        estouNoTime
-        ? `<button onclick="sairTime('${d.id}')" class="btn">SAIR DO TIME</button>`
-        : ""
+        !estouNoTime
+          ? `<button 
+                onclick="entrarTimeExistente('${t.id}')"
+                class="btn ${completo ? 'btn-disabled' : ''}"
+                ${completo ? 'disabled' : ''}
+             >
+                ${completo ? 'TIME LOTADO 🔒' : 'ENTRAR NESTE TIME'}
+             </button>`
+          : `<button onclick="sairTime('${t.id}')" class="btn">SAIR DO TIME</button>`
       }
 
     </div>
@@ -311,6 +249,7 @@ ${
 
   document.getElementById("times").innerHTML = html;
 }
+
 // 🔹 INIT
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btnLogin").addEventListener("click", login);
