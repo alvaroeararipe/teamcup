@@ -29,12 +29,12 @@
   <!-- 🧾 FORMULÁRIO -->
   <div class="card">
 
-    <input id="nome" placeholder="Seu nome"><br>
+    <input id="nome" placeholder="Seu nome"><br><br>
 
     <select id="genero">
       <option value="M">Homem</option>
       <option value="F">Mulher</option>
-    </select>
+    </select><br><br>
 
     <select id="categoria">
       <option value="B">Categoria B</option>
@@ -45,9 +45,12 @@
 
     <br><br>
 
-  <button id="btnEntrar" class="btn" onclick="criarTimeNovo()">CRIAR TIME NOVO</button>
- <br>   
-(ou escolha abaixo)
+    <!-- ✅ SEM onclick -->
+    <button id="btnEntrar" class="btn">CRIAR TIME NOVO</button>
+
+    <br><br>
+    (ou escolha abaixo)
+
   </div>
 
   <!-- 🧠 LISTA DE TIMES -->
@@ -62,7 +65,5 @@
   <!-- 🚀 SCRIPT -->
   <script type="module" src="app.js"></script>
 
-
 </body>
-
 </html>
