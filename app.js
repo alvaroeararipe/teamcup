@@ -301,7 +301,7 @@ ${
 
       ${
         estouNoTime
-        ? `<button onclick="sairTime('${t.id}')" class="btn">SAIR DO TIME</button>`
+        ? `<button onclick="sairTime('${d.id}')" class="btn">SAIR DO TIME</button>`
         : ""
       }
 
