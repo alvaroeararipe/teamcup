@@ -162,6 +162,9 @@ input, select {
   z-index: 0;
   opacity: 0;
   transition: 0.4s;
+
+  /* 🔥 ISSO AQUI RESOLVE SEU PROBLEMA */
+  pointer-events: none;
 }
 
 .card:hover::before {
