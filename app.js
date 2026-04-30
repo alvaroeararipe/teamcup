@@ -217,8 +217,7 @@ async function carregar() {
       ).join(", ") || "-";
 
     const estouNoTime = [...t.homens, ...t.mulheres]
-      .some(p => p.uid === user?.uid);
-
+  .some(p => p.uid === user?.uid || p.nome === document.getElementById("nome").value.trim());
     html += `
     <div class="card fade">
       <h3>Categoria ${t.categoria}</h3>
