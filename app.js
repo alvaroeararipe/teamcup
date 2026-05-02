@@ -72,7 +72,7 @@ window.entrarTime = async () => {
       const todos = [...t.homens, ...t.mulheres];
       if (todos.find(p => p.uid === user.uid)) {
         carregando = false;
-        return alert("Você já está em um time");
+        return alert("Você já está em um time. Já se inscreveu no LetzPlay?");
       }
     }
 
@@ -87,7 +87,7 @@ window.entrarTime = async () => {
 
       await addDoc(collection(db, "times"), novo);
 
-      alert("Novo time criado!");
+      alert("Novo time criado! Você já se inscreveu no LetzPlay?");
       carregar();
 
     } else {
@@ -128,7 +128,7 @@ window.entrarTimeExistente = async (timeId) => {
         const todos = [...t.homens, ...t.mulheres];
 
         if (todos.find(p => p.uid === user.uid)) {
-          return alert("Você já está neste time");
+          return alert("Você já está neste time. Você já se inscreveu no LetzPlay?");
         }
 
         if (genero === "M" && t.homens.length < 2) {
